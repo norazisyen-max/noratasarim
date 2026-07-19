@@ -9,13 +9,16 @@
 <div class="panel-container">
     <div class="panel-header">
         <h1>🌸 Nora Panel</h1>
-        <div>
-            Ciro: <b>{{ stats.ciro }} TL</b> &nbsp;|&nbsp;
-            <a href="/logout" style="color:var(--primary); font-weight:bold;">Çıkış</a>
-        </div>
+        <div><a href="/logout" style="color:var(--primary); font-weight:bold;">Çıkış</a></div>
     </div>
 
-    <!-- Siparişler -->
+    <div class="stats-grid">
+        <div class="stat-card"><div class="sayi">{{ stats.toplam_siparis }}</div><div>Sipariş</div></div>
+        <div class="stat-card"><div class="sayi">{{ stats.ciro }} TL</div><div>Ciro</div></div>
+        <div class="stat-card"><div class="sayi">{{ stats.toplam_urun }}</div><div>Ürün</div></div>
+        <div class="stat-card"><div class="sayi">{{ stats.toplam_mesaj }}</div><div>Mesaj</div></div>
+    </div>
+
     <div class="box">
         <h2>📦 Siparişler</h2>
         <table>
@@ -35,6 +38,7 @@
                             <option value="Teslim Edildi" {% if s.durum == 'Teslim Edildi' %}selected{% endif %}>Teslim</option>
                         </select>
                     </form>
+                    <span class="durum-etiket durum-{{ s.durum|lower|replace(' ','-') }}">{{ s.durum }}</span>
                 </td>
                 <td><a href="/siparis-sil/{{ s.id }}" class="btn-sil">Sil</a></td>
             </tr>
@@ -43,7 +47,6 @@
         </table>
     </div>
 
-    <!-- Kuponlar -->
     <div class="box">
         <h2>🎟️ İndirim Kodları</h2>
         <form action="/kupon-ekle" method="POST" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
@@ -53,16 +56,11 @@
         </form>
         <table>
             {% for k in kuponlar %}
-            <tr>
-                <td><b>{{ k.kod }}</b></td>
-                <td>%{{ k.oran }}</td>
-                <td><a href="/kupon-sil/{{ k.id }}" class="btn-sil">Sil</a></td>
-            </tr>
+            <tr><td><b>{{ k.kod }}</b></td><td>%{{ k.oran }}</td><td><a href="/kupon-sil/{{ k.id }}" class="btn-sil">Sil</a></td></tr>
             {% endfor %}
         </table>
     </div>
 
-    <!-- Ürün Ekle -->
     <div class="box">
         <h2>➕ Yeni Ürün Ekle</h2>
         <form action="/urun-ekle" method="POST">
@@ -76,6 +74,7 @@
                     <option value="Kutuda Çiçek">Kutuda Çiçek</option>
                 </select>
                 <input name="img" placeholder="Resim URL">
+                <input name="stok" type="number" placeholder="Stok adedi" value="10">
             </div>
             <textarea name="detay" placeholder="Ürün açıklaması"></textarea>
             <label style="display:block; margin:8px 0;">
@@ -85,7 +84,6 @@
         </form>
     </div>
 
-    <!-- Ürün Listesi + Düzenle -->
     <div class="box">
         <h2>📋 Tüm Ürünler</h2>
         <table>
@@ -94,6 +92,7 @@
                 <td><img src="{{ u.img }}" width="40" height="40" style="object-fit:cover; border-radius:8px;"></td>
                 <td>{{ u.baslik }}</td>
                 <td>{{ u.fiyat }} TL</td>
+                <td>Stok: {{ u.stok }}</td>
                 <td>
                     <button class="btn-duzenle" onclick="duzenleAc(
                         {{ u.id }},
@@ -103,7 +102,8 @@
                         '{{ u.img }}',
                         `{{ u.detay }}`,
                         '{{ u.kategori }}',
-                        {{ u.cok_satan }}
+                        {{ u.cok_satan }},
+                        {{ u.stok }}
                     )">Düzenle</button>
                     <a href="/urun-sil/{{ u.id }}" class="btn-sil">Sil</a>
                 </td>
@@ -111,9 +111,25 @@
             {% endfor %}
         </table>
     </div>
+
+    <div class="box">
+        <h2>✉️ Gelen Mesajlar</h2>
+        <table>
+            <thead><tr><th>Ad</th><th>E-posta</th><th>Mesaj</th><th>Tarih</th></tr></thead>
+            <tbody>
+            {% for m in iletisimler %}
+            <tr>
+                <td>{{ m.ad }}</td>
+                <td>{{ m.email }}</td>
+                <td><small>{{ m.mesaj }}</small></td>
+                <td>{{ m.tarih }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- Düzenle Modal -->
 <div id="duzenleModal" class="modal">
     <div class="modal-content">
         <h3>✏️ Ürünü Düzenle</h3>
@@ -128,6 +144,7 @@
                 <option value="Kutuda Çiçek">Kutuda Çiçek</option>
             </select>
             <input name="img" id="e_img" placeholder="Resim URL">
+            <input name="stok" id="e_stok" type="number" placeholder="Stok">
             <textarea id="e_detay" name="detay"></textarea>
             <label><input type="checkbox" name="cok_satan" id="e_cok_satan" value="1"> Çok Satan</label>
             <button type="submit" class="save-btn" style="width:100%; margin-top:12px;">Güncelle</button>
@@ -137,20 +154,23 @@
 </div>
 
 <script>
+/* eslint-disable */
     function ac(id) { document.getElementById(id).style.display = 'flex'; }
     function kapat(id) { document.getElementById(id).style.display = 'none'; }
 
-    function duzenleAc(id, baslik, fiyat, eski, img, detay, kat, cs) {
+    function duzenleAc(id, baslik, fiyat, eski, img, detay, kat, cs, stok) {
         document.getElementById('editForm').action = '/urun-duzenle/' + id;
         document.getElementById('e_baslik').value = baslik;
         document.getElementById('e_fiyat').value = fiyat;
         document.getElementById('e_eski_fiyat').value = eski || '';
         document.getElementById('e_img').value = img;
+        document.getElementById('e_stok').value = stok || 0;
         document.getElementById('e_detay').value = detay;
         document.getElementById('e_kategori').value = kat;
         document.getElementById('e_cok_satan').checked = (cs == 1);
         ac('duzenleModal');
     }
+/* eslint-enable */
 </script>
 </body>
 </html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İletişim | Nora</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+    <div class="logo"><span>🌸 NORA</span><small>Çiçekçilik</small></div>
+    <div class="header-actions">
+        <button onclick="window.location.href='/'">🏠</button>
+        <button onclick="window.location.href='/iletisim'">✉️</button>
+    </div>
+</header>
+
+<div class="iletisim-form">
+    <h2>📬 Bize Yazın</h2>
+    <form method="POST">
+        <label>Adınız</label>
+        <input type="text" name="ad" required>
+        <label>E-posta</label>
+        <input type="email" name="email" required>
+        <label>Mesajınız</label>
+        <textarea name="mesaj" rows="4" required></textarea>
+        <button type="submit" class="save-btn" style="width:100%;">Gönder</button>
+    </form>
+</div>
+
+<footer>
+    <div class="footer-links"><a href="/">Ana Sayfa</a><a href="/iletisim">İletişim</a></div>
+    <p>&copy; 2026 Nora Çiçekçilik</p>
+</footer>
+</body>
+</html>

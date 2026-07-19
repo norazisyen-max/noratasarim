@@ -12,10 +12,13 @@
         <h2>NORA ÇİÇEK</h2>
         <p style="color:var(--text-light); font-size:13px; margin-bottom:24px;">Yönetim Paneli</p>
         <form action="/login" method="post">
-            <input type="text" name="username" placeholder="Kullanıcı adı" required>
+            <input type="text" name="username" placeholder="Kullanıcı adı" required value="NORA">
             <input type="password" name="password" placeholder="Şifre" required>
             <button type="submit" class="btn">Giriş Yap</button>
         </form>
+        {% if hata %}
+        <div class="hata">{{ hata }}</div>
+        {% endif %}
     </div>
 </body>
 </html>

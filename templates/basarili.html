@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mesajınız İletildi - Nora</title>
+    <title>Başarılı | Nora</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="basari-kutu">
-        <div class="icon">✅</div>
-        <h1>Mesajınız Başarıyla İletildi!</h1>
-        <p>Bizimle iletişime geçtiğiniz için teşekkürler. En kısa sürede Telegram üzerinden bildiriminiz alındı ve size dönüş yapacağız.</p>
-        <a href="/" class="btn-ana-don">Ana Sayfaya Dön</a>
-    </div>
+<div class="basari-kutu">
+    <div class="icon">✅</div>
+    <h1>Başarılı!</h1>
+    <p>{{ mesaj or 'İşleminiz tamamlandı.' }}</p>
+    <a href="/" class="btn-ana-don">Ana Sayfaya Dön</a>
+</div>
 </body>
 </html>
