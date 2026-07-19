@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nora | Yönetim Giriş</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="background:var(--bg); display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0;">
+    <div class="login-box">
+        <div class="flower-icon">🌸</div>
+        <h2>NORA ÇİÇEK</h2>
+        <p style="color:var(--text-light); font-size:13px; margin-bottom:24px;">Yönetim Paneli</p>
+        <form action="/login" method="post">
+            <input type="text" name="username" placeholder="Kullanıcı adı" required>
+            <input type="password" name="password" placeholder="Şifre" required>
+            <button type="submit" class="btn">Giriş Yap</button>
+        </form>
+    </div>
+</body>
+</html>

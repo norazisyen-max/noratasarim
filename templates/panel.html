@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Nora Yönetim</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="panel-container">
+    <div class="panel-header">
+        <h1>🌸 Nora Panel</h1>
+        <div>
+            Ciro: <b>{{ stats.ciro }} TL</b> &nbsp;|&nbsp;
+            <a href="/logout" style="color:var(--primary); font-weight:bold;">Çıkış</a>
+        </div>
+    </div>
+
+    <!-- Siparişler -->
+    <div class="box">
+        <h2>📦 Siparişler</h2>
+        <table>
+            <thead><tr><th>Müşteri</th><th>Ürünler</th><th>Tutar</th><th>Durum</th><th></th></tr></thead>
+            <tbody>
+            {% for s in siparisler %}
+            <tr>
+                <td>{{ s.ad }}<br><small>{{ s.tel }}</small></td>
+                <td><small>{{ s.urunler }}</small></td>
+                <td><b>{{ s.toplam }} TL</b></td>
+                <td>
+                    <form action="/durum-guncelle/{{ s.id }}" method="POST">
+                        <select name="durum" onchange="this.form.submit()" style="padding:4px 8px; border-radius:20px; border:1px solid #ddd; background:white;">
+                            <option value="Yeni" {% if s.durum == 'Yeni' %}selected{% endif %}>Yeni</option>
+                            <option value="Hazırlanıyor" {% if s.durum == 'Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
+                            <option value="Yolda" {% if s.durum == 'Yolda' %}selected{% endif %}>Yolda</option>
+                            <option value="Teslim Edildi" {% if s.durum == 'Teslim Edildi' %}selected{% endif %}>Teslim</option>
+                        </select>
+                    </form>
+                </td>
+                <td><a href="/siparis-sil/{{ s.id }}" class="btn-sil">Sil</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Kuponlar -->
+    <div class="box">
+        <h2>🎟️ İndirim Kodları</h2>
+        <form action="/kupon-ekle" method="POST" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <input name="kod" placeholder="KOD" required style="flex:1; min-width:120px;">
+            <input name="oran" type="number" placeholder="%" required style="width:80px;">
+            <button type="submit" class="save-btn">Ekle</button>
+        </form>
+        <table>
+            {% for k in kuponlar %}
+            <tr>
+                <td><b>{{ k.kod }}</b></td>
+                <td>%{{ k.oran }}</td>
+                <td><a href="/kupon-sil/{{ k.id }}" class="btn-sil">Sil</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Ürün Ekle -->
+    <div class="box">
+        <h2>➕ Yeni Ürün Ekle</h2>
+        <form action="/urun-ekle" method="POST">
+            <div class="form-grid">
+                <input name="baslik" placeholder="Ürün Adı" required>
+                <input name="fiyat" type="number" placeholder="Fiyat" required>
+                <select name="kategori">
+                    <option value="Gül">Gül 🌹</option>
+                    <option value="Kanatlı Tasarımlar">Kanatlı Tasarımlar 🕊️</option>
+                    <option value="Buketler">Buketler</option>
+                    <option value="Kutuda Çiçek">Kutuda Çiçek</option>
+                </select>
+                <input name="img" placeholder="Resim URL">
+            </div>
+            <textarea name="detay" placeholder="Ürün açıklaması"></textarea>
+            <label style="display:block; margin:8px 0;">
+                <input type="checkbox" name="cok_satan" value="1"> Çok Satan
+            </label>
+            <button type="submit" class="save-btn">Mağazaya Ekle</button>
+        </form>
+    </div>
+
+    <!-- Ürün Listesi + Düzenle -->
+    <div class="box">
+        <h2>📋 Tüm Ürünler</h2>
+        <table>
+            {% for u in urunler %}
+            <tr>
+                <td><img src="{{ u.img }}" width="40" height="40" style="object-fit:cover; border-radius:8px;"></td>
+                <td>{{ u.baslik }}</td>
+                <td>{{ u.fiyat }} TL</td>
+                <td>
+                    <button class="btn-duzenle" onclick="duzenleAc(
+                        {{ u.id }},
+                        '{{ u.baslik }}',
+                        {{ u.fiyat }},
+                        {{ u.eski_fiyat }},
+                        '{{ u.img }}',
+                        `{{ u.detay }}`,
+                        '{{ u.kategori }}',
+                        {{ u.cok_satan }}
+                    )">Düzenle</button>
+                    <a href="/urun-sil/{{ u.id }}" class="btn-sil">Sil</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- Düzenle Modal -->
+<div id="duzenleModal" class="modal">
+    <div class="modal-content">
+        <h3>✏️ Ürünü Düzenle</h3>
+        <form id="editForm" method="POST">
+            <input name="baslik" id="e_baslik" required>
+            <input name="fiyat" id="e_fiyat" type="number" required>
+            <input name="eski_fiyat" id="e_eski_fiyat" type="number" placeholder="Eski fiyat (varsa)">
+            <select name="kategori" id="e_kategori">
+                <option value="Gül">Gül 🌹</option>
+                <option value="Kanatlı Tasarımlar">Kanatlı Tasarımlar 🕊️</option>
+                <option value="Buketler">Buketler</option>
+                <option value="Kutuda Çiçek">Kutuda Çiçek</option>
+            </select>
+            <input name="img" id="e_img" placeholder="Resim URL">
+            <textarea id="e_detay" name="detay"></textarea>
+            <label><input type="checkbox" name="cok_satan" id="e_cok_satan" value="1"> Çok Satan</label>
+            <button type="submit" class="save-btn" style="width:100%; margin-top:12px;">Güncelle</button>
+            <button type="button" onclick="kapat('duzenleModal')" style="width:100%; margin-top:8px; border:none; background:transparent; color:#999; cursor:pointer;">İptal</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function ac(id) { document.getElementById(id).style.display = 'flex'; }
+    function kapat(id) { document.getElementById(id).style.display = 'none'; }
+
+    function duzenleAc(id, baslik, fiyat, eski, img, detay, kat, cs) {
+        document.getElementById('editForm').action = '/urun-duzenle/' + id;
+        document.getElementById('e_baslik').value = baslik;
+        document.getElementById('e_fiyat').value = fiyat;
+        document.getElementById('e_eski_fiyat').value = eski || '';
+        document.getElementById('e_img').value = img;
+        document.getElementById('e_detay').value = detay;
+        document.getElementById('e_kategori').value = kat;
+        document.getElementById('e_cok_satan').checked = (cs == 1);
+        ac('duzenleModal');
+    }
+</script>
+</body>
+</html>

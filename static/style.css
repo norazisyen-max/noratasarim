@@ -1,0 +1,607 @@
+/* ========== ROOT DEĞİŞKENLER ========== */
+:root {
+    --primary: #c2185b;
+    --primary-dark: #880e4f;
+    --primary-light: #f8bbd0;
+    --bg: #fcf8fa;
+    --card-bg: #ffffff;
+    --text: #1e1e1e;
+    --text-light: #6b6b6b;
+    --shadow: 0 10px 30px rgba(194, 24, 91, 0.08);
+    --radius: 16px;
+    --transition: 0.25s ease;
+}
+
+/* ========== GENEL ========== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 90px;
+    line-height: 1.5;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* ========== HEADER ========== */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+}
+
+.logo {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+.logo span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+}
+.logo small {
+    font-size: 13px;
+    color: var(--text-light);
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.header-actions button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 10px;
+    transition: background var(--transition);
+    position: relative;
+}
+.header-actions button:hover {
+    background: var(--primary-light);
+}
+
+.cart-icon span {
+    background: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    font-weight: bold;
+}
+
+#main-nav {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    background: white;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+#main-nav.open {
+    display: flex;
+}
+#main-nav a {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-weight: 500;
+    color: var(--text);
+}
+#main-nav a:hover {
+    color: var(--primary);
+}
+
+@media (min-width: 768px) {
+    header {
+        padding: 16px 40px;
+    }
+    #main-nav {
+        display: flex !important;
+        flex-direction: row;
+        position: static;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        gap: 24px;
+    }
+    #main-nav a {
+        border: none;
+        padding: 0;
+        font-size: 15px;
+    }
+    .menu-toggle {
+        display: none !important;
+    }
+}
+
+/* ========== HERO ========== */
+.hero {
+    background: linear-gradient(135deg, var(--primary-light), #fff0f3);
+    padding: 60px 20px 40px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.hero h1 {
+    font-size: 28px;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+}
+.hero p {
+    color: var(--text-light);
+    font-size: 16px;
+    max-width: 400px;
+    margin: 0 auto 20px;
+}
+.hero .btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.hero .btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+/* ========== KATEGORİ BUTONLARI ========== */
+.kat-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 12px 16px 16px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.kat-scroll::-webkit-scrollbar {
+    display: none;
+}
+.kat-btn {
+    flex: 0 0 auto;
+    background: white;
+    border: 1px solid #eee;
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+.kat-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(194,24,91,0.2);
+}
+.kat-btn:hover {
+    border-color: var(--primary);
+}
+
+/* ========== ÜRÜN GRID ========== */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 16px;
+    padding: 0 16px 30px;
+}
+
+.product-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(194,24,91,0.10);
+}
+
+.product-image {
+    position: relative;
+    background: #f5f0f2;
+}
+.product-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+.badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--primary);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+}
+
+.product-info {
+    padding: 12px 14px 10px;
+}
+.product-info h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.prices {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.price {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--primary);
+}
+.old-price {
+    font-size: 13px;
+    color: #aaa;
+    text-decoration: line-through;
+}
+
+.add-to-cart {
+    width: 100%;
+    border: none;
+    background: var(--primary);
+    color: white;
+    padding: 10px 0;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+.add-to-cart:hover {
+    background: var(--primary-dark);
+}
+
+/* ========== SEPET BAR (fixed) ========== */
+#sepet-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 420px;
+    background: var(--primary);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 50px;
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 8px 30px rgba(194,24,91,0.35);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 15px;
+}
+#sepet-bar b {
+    font-weight: 700;
+}
+
+/* ========== MODAL (ortak) ========== */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+.modal-content {
+    background: white;
+    padding: 28px 24px;
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-content h3 {
+    color: var(--primary);
+    margin-bottom: 16px;
+    font-size: 20px;
+}
+
+/* ========== SEPET İÇİ ========== */
+.sepet-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+.sil-btn {
+    background: none;
+    border: none;
+    color: #ff1744;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+.sil-btn:hover {
+    background: #ffebee;
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 6px 0 12px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    font-size: 14px;
+    background: #fafafa;
+    transition: border var(--transition);
+}
+.modal-content input:focus,
+.modal-content textarea:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+/* ========== DETAY SAYFASI ========== */
+.detay-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.detay-img {
+    width: 100%;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+.detay-info {
+    text-align: center;
+    padding: 20px 0;
+}
+.detay-info .price {
+    font-size: 28px;
+}
+.detay-desc {
+    background: #f9f5f7;
+    padding: 20px;
+    border-radius: var(--radius);
+    text-align: left;
+    white-space: pre-wrap;
+    line-height: 1.7;
+    border: 1px solid #f0e8eb;
+}
+.btn-sepete-ekle {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: var(--radius);
+    width: 100%;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background var(--transition);
+}
+.btn-sepete-ekle:hover {
+    background: var(--primary-dark);
+}
+.detay-geri {
+    display: block;
+    margin-top: 20px;
+    color: var(--text-light);
+    text-align: center;
+}
+
+/* ========== BAŞARILI SAYFASI ========== */
+.basari-kutu {
+    text-align: center;
+    padding: 60px 20px;
+    max-width: 500px;
+    margin: 80px auto;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--primary-light);
+}
+.basari-kutu .icon {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+.basari-kutu h1 {
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+.btn-ana-don {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: var(--primary);
+    color: white;
+    border-radius: 30px;
+    font-weight: 600;
+}
+
+/* ========== LOGIN ========== */
+.login-box {
+    background: white;
+    padding: 40px 32px;
+    border-radius: var(--radius);
+    max-width: 340px;
+    margin: 80px auto;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+.login-box h2 {
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+.login-box .flower-icon {
+    font-size: 48px;
+}
+.login-box input {
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    font-size: 15px;
+}
+.login-box .btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 14px;
+    width: 100%;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* ========== PANEL ========== */
+.panel-container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.panel-header h1 {
+    color: var(--primary);
+}
+.box {
+    background: white;
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+}
+.box h2 {
+    border-left: 4px solid var(--primary);
+    padding-left: 14px;
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+th, td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+    vertical-align: middle;
+}
+.btn-sil {
+    color: #d32f2f;
+    background: #ffebee;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+.btn-duzenle {
+    background: #e3f2fd;
+    color: #0d47a1;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+.save-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.save-btn:hover {
+    background: var(--primary-dark);
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.form-grid input, .form-grid select {
+    padding: 10px 14px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    font-size: 14px;
+    background: #fafafa;
+}
+textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    font-size: 14px;
+    min-height: 60px;
+    margin: 8px 0;
+}

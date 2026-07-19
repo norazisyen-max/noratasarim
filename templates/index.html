@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NORA Çiçekçilik</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="logo">
+        <span>🌸 NORA</span>
+        <small>Çiçekçilik</small>
+    </div>
+    <div class="header-actions">
+        <button onclick="ac('takip-modal')" title="Sipariş Takip">📦</button>
+        <button class="cart-icon" onclick="sepetAc()">
+            🛒 <span id="cart-count">0</span>
+        </button>
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    </div>
+    <nav id="main-nav">
+        <a href="/">Ana Sayfa</a>
+        <a href="#kategoriler">Kategoriler</a>
+        <a href="#cok-satan">Popüler</a>
+        <a href="/panel" target="_blank">Yönetim</a>
+    </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <h1>🌸 Taze Çiçekler, Özel Tasarımlar</h1>
+    <p>Sevdiklerinize en güzel sürprizi yapın. Her buket özenle hazırlanır.</p>
+    <button class="btn-primary" onclick="document.getElementById('kategoriler').scrollIntoView()">Keşfet</button>
+</section>
+
+<!-- KATEGORİLER -->
+<div class="kat-scroll" id="kategoriler">
+    <button class="kat-btn active" onclick="filtrele('Hepsi', this)">Hepsi</button>
+    {% for kat in kategoriler %}
+    <button class="kat-btn" onclick="filtrele('{{ kat }}', this)">{{ kat }}</button>
+    {% endfor %}
+</div>
+
+<!-- ÜRÜN GRID -->
+<div class="product-grid" id="urun-grid">
+    {% for u in urunler %}
+    <div class="product-card urun-item" data-kategori="{{ u.kategori }}">
+        <a href="/urun/{{ u.id }}">
+            <div class="product-image">
+                <img src="{{ u.img }}" alt="{{ u.baslik }}" loading="lazy">
+                {% if u.cok_satan == 1 %}
+                <span class="badge">🔥 Popüler</span>
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <h3>{{ u.baslik }}</h3>
+                <div class="prices">
+                    {% if u.eski_fiyat > 0 %}
+                    <span class="old-price">{{ u.eski_fiyat }} TL</span>
+                    {% endif %}
+                    <span class="price">{{ u.fiyat }} TL</span>
+                </div>
+            </div>
+        </a>
+        <button class="add-to-cart" onclick="ekle('{{ u.baslik }}', {{ u.fiyat }})">Sepete Ekle</button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- SEPET BAR (fixed) -->
+<div id="sepet-bar" onclick="sepetAc()">
+    <span>🛒 <b id="s-adet">0</b> Ürün</span>
+    <span><b>Tamamla <span id="s-toplam">0</span> TL ></b></span>
+</div>
+
+<!-- SEPET MODAL -->
+<div id="sepet-modal" class="modal">
+    <div class="modal-content">
+        <h3>🛒 Sepetiniz</h3>
+        <div id="liste" style="max-height:180px; overflow-y:auto; margin-bottom:12px;"></div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <input id="kupon-input" placeholder="İndirim Kodu" style="margin:0; flex:1;">
+            <button onclick="kuponUygula()" style="background:#4caf50; color:white; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:bold;">Uygula</button>
+        </div>
+        <input id="ad" placeholder="Ad Soyad">
+        <input id="tel" placeholder="Telefon">
+        <textarea id="adr" placeholder="Adres" rows="2"></textarea>
+        <button class="save-btn" style="width:100%; padding:16px;" onclick="gonder()">
+            Siparişi Onayla (<span id="final-tutar">0</span> TL)
+        </button>
+        <p onclick="kapat('sepet-modal')" style="color:#aaa; cursor:pointer; margin-top:12px; font-size:13px;">Kapat</p>
+    </div>
+</div>
+
+<!-- BAŞARI MODAL -->
+<div id="basari" class="modal">
+    <div class="modal-content">
+        <div style="font-size:50px;">🌸</div>
+        <h2>Sipariş Alındı!</h2>
+        <p>Takip No: <b id="sid" style="color:var(--primary); font-size:22px;"></b></p>
+        <div style="background:#fdf2f5; padding:14px; border-radius:12px; border:1px dashed var(--primary); font-size:13px; text-align:left;">
+            <b>Ödeme Bilgileri:</b><br>
+            Alıcı: <b>{{ sahip }}</b><br>
+            IBAN: <b>{{ iban }}</b>
+        </div>
+        <button class="save-btn" onclick="location.reload()" style="margin-top:14px;">Tamam</button>
+    </div>
+</div>
+
+<!-- TAKİP MODAL -->
+<div id="takip-modal" class="modal">
+    <div class="modal-content">
+        <h3>📦 Sipariş Takip</h3>
+        <input id="tid" placeholder="Sipariş No (örnek: 1)">
+        <button class="save-btn" onclick="sorgula()">SORGULA</button>
+        <div id="sonuc" style="margin-top:16px; text-align:left;"></div>
+        <p onclick="kapat('takip-modal')" style="cursor:pointer; color:#aaa; margin-top:12px;">Kapat</p>
+    </div>
+</div>
+
+<script>
+    let sepet = [], indirim = 0;
+
+    function ac(id) { document.getElementById(id).style.display = 'flex'; }
+    function kapat(id) { document.getElementById(id).style.display = 'none'; }
+    function toggleMenu() {
+        document.getElementById('main-nav').classList.toggle('open');
+    }
+
+    function filtrele(kat, btn) {
+        document.querySelectorAll('.kat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.urun-item').forEach(u => {
+            u.style.display = (kat === 'Hepsi' || u.dataset.kategori === kat) ? 'block' : 'none';
+        });
+    }
+
+    function ekle(ad, fiyat) {
+        sepet.push({ad, fiyat});
+        guncelle();
+        // Toast mesajı
+        let toast = document.createElement('div');
+        toast.textContent = '✅ ' + ad + ' sepete eklendi!';
+        toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 24px;border-radius:30px;z-index:3000;font-size:14px;box-shadow:0 8px 20px rgba(0,0,0,0.2);';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    function sil(i) {
+        sepet.splice(i, 1);
+        guncelle();
+        if (sepet.length === 0) kapat('sepet-modal');
+        else sepetAc();
+    }
+
+    function guncelle() {
+        let t = sepet.reduce((a, b) => a + b.fiyat, 0);
+        let son = t - (t * indirim / 100);
+        document.getElementById('s-adet').innerText = sepet.length;
+        document.getElementById('s-toplam').innerText = son;
+        document.getElementById('final-tutar').innerText = son;
+        document.getElementById('cart-count').innerText = sepet.length;
+        document.getElementById('sepet-bar').style.display = sepet.length > 0 ? 'flex' : 'none';
+    }
+
+    function sepetAc() {
+        let h = "";
+        sepet.forEach((v, i) => {
+            h += `<div class="sepet-item">
+                    <span>${v.ad}</span>
+                    <div><b>${v.fiyat} TL</b>
+                    <button class="sil-btn" onclick="sil(${i})">✕</button></div>
+                  </div>`;
+        });
+        document.getElementById('liste').innerHTML = h || "Sepet boş";
+        ac('sepet-modal');
+    }
+
+    function kuponUygula() {
+        let kod = document.getElementById('kupon-input').value.trim().toUpperCase();
+        if (!kod) return alert('Kod girin');
+        fetch('/kupon-kontrol', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({kod})
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.ok) {
+                indirim = d.oran;
+                alert('%' + d.oran + ' indirim uygulandı!');
+                guncelle();
+            } else {
+                alert('Geçersiz kod!');
+            }
+        });
+    }
+
+    function gonder() {
+        let ad = document.getElementById('ad').value.trim();
+        let tel = document.getElementById('tel').value.trim();
+        let adr = document.getElementById('adr').value.trim();
+        if (!ad || !tel || !adr) return alert('Lütfen tüm alanları doldurun.');
+        let t = sepet.reduce((a, b) => a + b.fiyat, 0);
+        fetch('/siparis-ver', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                musteri: {ad, tel, adres: adr},
+                sepet,
+                toplam: (t - (t * indirim / 100))
+            })
+        })
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('sid').innerText = '#' + d.id;
+            kapat('sepet-modal');
+            ac('basari');
+        });
+    }
+
+    function sorgula() {
+        let id = document.getElementById('tid').value.trim().replace('#','');
+        if (!id) return alert('No girin');
+        fetch('/siparis-sorgula/' + id)
+        .then(r => r.json())
+        .then(d => {
+            if (d.ok) {
+                document.getElementById('sonuc').innerHTML = `
+                    <b>Müşteri:</b> ${d.ad}<br>
+                    <b>Ürünler:</b> ${d.urunler}<br>
+                    <b>Durum:</b> <span style="color:var(--primary);font-weight:bold;">${d.durum}</span>
+                `;
+            } else {
+                document.getElementById('sonuc').innerHTML = '❌ Sipariş bulunamadı.';
+            }
+        });
+    }
+
+    // Sayfa yüklendiğinde sepette varsa göster
+    guncelle();
+</script>
+</body>
+</html>
