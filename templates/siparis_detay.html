@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sipariş Detayı #{{ siparis.id }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div style="max-width:500px; margin:40px auto; background:white; padding:30px; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.05);">
+    <h2 style="color:var(--primary);">🌸 Sipariş #{{ siparis.id }}</h2>
+    <p><b>Müşteri:</b> {{ siparis.ad }}</p>
+    <p><b>Telefon:</b> {{ siparis.tel }}</p>
+    <p><b>Adres:</b> {{ siparis.adres }}</p>
+    <p><b>Ürünler:</b> {{ siparis.urunler }}</p>
+    <p><b>Toplam:</b> {{ siparis.toplam }} TL</p>
+    <p><b>Durum:</b> 
+        <span class="durum-etiket durum-{{ siparis.durum|lower|replace(' ','-') }}">
+            {{ siparis.durum }}
+        </span>
+    </p>
+    <p><b>Tarih:</b> {{ siparis.tarih }}</p>
+    {% if siparis.kargo_no %}
+    <p><b>📦 Kargo Takip No:</b> {{ siparis.kargo_no }}</p>
+    {% endif %}
+    
+    <a href="https://wa.me/905013158008?text=Sipariş%20#{{ siparis.id }}%20hakkında%20bilgi%20almak%20istiyorum."
+       target="_blank" style="background:#25D366; color:white; padding:12px 30px; border-radius:30px; display:inline-block; font-weight:bold; text-decoration:none; margin-top:15px;">
+        📱 Siparişi WhatsApp'ta Sorgula
+    </a>
+    <br><br>
+    <a href="/" class="btn-ana-don">← Ana Sayfa</a>
+</div>
+</body>
+</html>

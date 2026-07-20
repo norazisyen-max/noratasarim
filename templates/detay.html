@@ -10,15 +10,18 @@
 <div class="detay-container">
     <img src="{{ cicek.img }}" alt="{{ cicek.baslik }}" class="detay-img">
     <div class="detay-info">
-        <h1 style="margin-bottom:4px; color:var(--text);">{{ cicek.baslik }}</h1>
+        <h1>{{ cicek.baslik }}</h1>
         <div class="prices" style="justify-content:center;">
-            {% if cicek.eski_fiyat > 0 %}
+            {% if cicek.eski_fiyat|int > 0 %}
             <span class="old-price">{{ cicek.eski_fiyat }} TL</span>
             {% endif %}
             <span class="price" style="font-size:28px;">{{ cicek.fiyat }} TL</span>
         </div>
         <div style="margin:8px 0; font-weight:bold; color: {% if cicek.stok > 0 %}green{% else %}red{% endif %};">
             Stok: {{ cicek.stok }} adet
+            {% if cicek.stok == 1 %}
+            <span style="color:orange;">⭐ Son ürün!</span>
+            {% endif %}
         </div>
         <div class="detay-desc">{{ cicek.detay }}</div>
         {% if cicek.stok > 0 %}

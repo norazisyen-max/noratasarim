@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Nora Yönetim</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="panel-container">
@@ -20,9 +21,14 @@
     </div>
 
     <div class="box">
+        <h2>📊 Son 7 Gün Sipariş Grafiği</h2>
+        <canvas id="siparisChart" width="400" height="200"></canvas>
+    </div>
+
+    <div class="box">
         <h2>📦 Siparişler</h2>
         <table>
-            <thead><tr><th>Müşteri</th><th>Ürünler</th><th>Tutar</th><th>Durum</th><th></th></tr></thead>
+            <thead><tr><th>Müşteri</th><th>Ürünler</th><th>Tutar</th><th>Durum</th><th>Kargo No</th><th></th></tr></thead>
             <tbody>
             {% for s in siparisler %}
             <tr>
@@ -39,6 +45,15 @@
                         </select>
                     </form>
                     <span class="durum-etiket durum-{{ s.durum|lower|replace(' ','-') }}">{{ s.durum }}</span>
+                </td>
+                <td>
+                    <form action="/kargo-guncelle/{{ s.id }}" method="POST" style="display:flex; gap:4px; flex-wrap:wrap;">
+                        <input name="kargo_no" value="{{ s.kargo_no or '' }}" placeholder="Kargo No" style="padding:4px 8px; border-radius:8px; border:1px solid #ddd; font-size:12px; width:100px;">
+                        <button type="submit" class="btn-duzenle" style="font-size:11px; padding:4px 10px;">Güncelle</button>
+                    </form>
+                    {% if s.kargo_no %}
+                        <span style="font-size:11px; color:var(--primary);">📦 {{ s.kargo_no }}</span>
+                    {% endif %}
                 </td>
                 <td><a href="/siparis-sil/{{ s.id }}" class="btn-sil">Sil</a></td>
             </tr>
@@ -63,7 +78,7 @@
 
     <div class="box">
         <h2>➕ Yeni Ürün Ekle</h2>
-        <form action="/urun-ekle" method="POST">
+        <form action="/urun-ekle" method="POST" enctype="multipart/form-data">
             <div class="form-grid">
                 <input name="baslik" placeholder="Ürün Adı" required>
                 <input name="fiyat" type="number" placeholder="Fiyat" required>
@@ -73,8 +88,15 @@
                     <option value="Buketler">Buketler</option>
                     <option value="Kutuda Çiçek">Kutuda Çiçek</option>
                 </select>
-                <input name="img" placeholder="Resim URL">
                 <input name="stok" type="number" placeholder="Stok adedi" value="10">
+                <input name="img" placeholder="Resim URL (veya dosya yükle)" style="grid-column: span 2;">
+                <div style="grid-column: span 2;">
+                    <label style="background:#f0f0f0; padding:10px 20px; border-radius:12px; cursor:pointer; display:inline-block; border:1px dashed #ccc;">
+                        📁 Dosya Seç
+                        <input type="file" name="resim" accept="image/*" style="display:none;" onchange="document.getElementById('resim_adi').innerText = this.files[0] ? this.files[0].name : 'Dosya seçilmedi'">
+                    </label>
+                    <span id="resim_adi" style="margin-left:10px; color:#999; font-size:13px;">Dosya seçilmedi</span>
+                </div>
             </div>
             <textarea name="detay" placeholder="Ürün açıklaması"></textarea>
             <label style="display:block; margin:8px 0;">
@@ -92,7 +114,15 @@
                 <td><img src="{{ u.img }}" width="40" height="40" style="object-fit:cover; border-radius:8px;"></td>
                 <td>{{ u.baslik }}</td>
                 <td>{{ u.fiyat }} TL</td>
-                <td>Stok: {{ u.stok }}</td>
+                <td>
+                    Stok: {{ u.stok }}
+                    {% if u.stok <= 1 %}
+                        <span style="color:orange; font-weight:bold;"> ⚠️ Son ürün!</span>
+                    {% endif %}
+                    {% if u.stok <= 5 and u.stok > 1 %}
+                        <span style="color:red; font-weight:bold;"> ⬇️ Stok az!</span>
+                    {% endif %}
+                </td>
                 <td>
                     <button class="btn-duzenle" onclick="duzenleAc(
                         {{ u.id }},
@@ -130,10 +160,11 @@
     </div>
 </div>
 
+<!-- Düzenle Modal -->
 <div id="duzenleModal" class="modal">
     <div class="modal-content">
         <h3>✏️ Ürünü Düzenle</h3>
-        <form id="editForm" method="POST">
+        <form id="editForm" method="POST" enctype="multipart/form-data">
             <input name="baslik" id="e_baslik" required>
             <input name="fiyat" id="e_fiyat" type="number" required>
             <input name="eski_fiyat" id="e_eski_fiyat" type="number" placeholder="Eski fiyat (varsa)">
@@ -143,7 +174,14 @@
                 <option value="Buketler">Buketler</option>
                 <option value="Kutuda Çiçek">Kutuda Çiçek</option>
             </select>
-            <input name="img" id="e_img" placeholder="Resim URL">
+            <input name="img" id="e_img" placeholder="Resim URL (veya dosya yükle)">
+            <div>
+                <label style="background:#f0f0f0; padding:10px 20px; border-radius:12px; cursor:pointer; display:inline-block; border:1px dashed #ccc;">
+                    📁 Yeni Resim Seç
+                    <input type="file" name="resim" accept="image/*" style="display:none;" onchange="document.getElementById('edit_resim_adi').innerText = this.files[0] ? this.files[0].name : 'Dosya seçilmedi'">
+                </label>
+                <span id="edit_resim_adi" style="margin-left:10px; color:#999; font-size:13px;">Dosya seçilmedi</span>
+            </div>
             <input name="stok" id="e_stok" type="number" placeholder="Stok">
             <textarea id="e_detay" name="detay"></textarea>
             <label><input type="checkbox" name="cok_satan" id="e_cok_satan" value="1"> Çok Satan</label>
@@ -170,6 +208,41 @@
         document.getElementById('e_cok_satan').checked = (cs == 1);
         ac('duzenleModal');
     }
+
+    // Grafik
+    fetch('/grafik-verisi')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('siparisChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.gunler,
+                    datasets: [
+                        {
+                            label: 'Sipariş Sayısı',
+                            data: data.adetler,
+                            backgroundColor: 'rgba(194,24,91,0.6)',
+                            borderColor: '#c2185b',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Ciro (TL)',
+                            data: data.cirolar,
+                            backgroundColor: 'rgba(76,175,80,0.6)',
+                            borderColor: '#4caf50',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        });
 /* eslint-enable */
 </script>
 </body>
