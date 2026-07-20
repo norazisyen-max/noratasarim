@@ -1,7 +1,6 @@
-nora.db
 __pycache__/
 *.pyc
 .env
-venv/
-.idea/
-.vscode/
+nora.db
+static/uploads/
+*.sqlite3
